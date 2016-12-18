@@ -1,5 +1,8 @@
 package ua.com.mcsim.gpstracker;
 
+import android.app.ActivityManager;
+import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -39,14 +42,7 @@ public class TrackerActivity extends AppCompatActivity {
         public void onProviderEnabled(String provider) {
             checkEnabled();
             if (ActivityCompat.checkSelfPermission(TrackerActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(TrackerActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
+                 return;
             }
             showLocation(locationManager.getLastKnownLocation(provider));
         }
@@ -106,21 +102,23 @@ public class TrackerActivity extends AppCompatActivity {
     }
 
     private void startTracking() {
-        Toast.makeText(this, "Tracking started :)", Toast.LENGTH_SHORT).show();
-        startService(new Intent(this,GPSservice.class));
+        Intent service = new Intent(this,GPSservice.class);
+        if (!isServiceRunning(GPSservice.class)) {
+            startService(service);
+            btnStart.setText("Stop tracking");
+            Toast.makeText(this, "Tracking started :)", Toast.LENGTH_SHORT).show();
+        } else {
+            stopService(service);
+            Toast.makeText(this, "Tracking stoped :(", Toast.LENGTH_SHORT).show();
+            btnStart.setText("Start tracking");
+        }
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
@@ -155,5 +153,15 @@ public class TrackerActivity extends AppCompatActivity {
                 "lat = %1$.4f, lon = %2$.4f, time = %3$tF %3$tT",
                 location.getLatitude(), location.getLongitude(), new Date(
                         location.getTime()));
+    }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
