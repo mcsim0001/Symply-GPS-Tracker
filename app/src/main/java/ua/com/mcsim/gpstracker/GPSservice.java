@@ -12,11 +12,24 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import static android.R.id.message;
+
 
 public class GPSservice extends IntentService {
+
+    private static final String TRACKING = "tracking";
+    private FirebaseAuth mFirebaseAuth;
+    private FirebaseUser mFirechatUser;
+    private String trackerName = "mcsim";
+    private DatabaseReference mSimpleFirechatDatabaseReference;
 
     public GPSservice() {
         super("GPSservice");
@@ -26,7 +39,7 @@ public class GPSservice extends IntentService {
     private LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            showLocation(location);
+            sendGPSmessage(location);
         }
 
         @Override
@@ -38,16 +51,10 @@ public class GPSservice extends IntentService {
         public void onProviderEnabled(String provider) {
 
             if (ActivityCompat.checkSelfPermission(GPSservice.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(GPSservice.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
+
                 return;
             }
-            showLocation(locationManager.getLastKnownLocation(provider));
+            sendGPSmessage(locationManager.getLastKnownLocation(provider));
         }
 
         @Override
@@ -59,6 +66,8 @@ public class GPSservice extends IntentService {
     @Override
     public void onCreate() {
         Log.d("mLog", "onCreate ..start");
+
+        //GPS stuff
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -68,6 +77,11 @@ public class GPSservice extends IntentService {
         locationManager.requestLocationUpdates(
                 LocationManager.NETWORK_PROVIDER, 1000 * 10, 10,
                 locationListener);
+
+        //Firebase stuff
+        mSimpleFirechatDatabaseReference = FirebaseDatabase.getInstance().getReference();
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        mFirechatUser = mFirebaseAuth.getCurrentUser();
         Log.d("mLog", "onCreate ..finish");
         super.onCreate();
 
@@ -85,31 +99,12 @@ public class GPSservice extends IntentService {
         stopSelf();
     }
 
-    private void showLocation(Location location) {
-        if (location == null)
-            return;
-        else {
-            Log.d("mLog", (formatLocation(location)));
-        }
-    }
-
-    private String formatLocation(Location location) {
-        if (location == null)
-            return "";
-        return String.format(
-                "lat = %1$.4f, lon = %2$.4f, time = %3$tF %3$tT",
-                location.getLatitude(), location.getLongitude(), new Date(
-                        location.getTime()));
-    }
-
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("mLog", "on Start command");
 
         return super.onStartCommand(intent, flags, startId);
     }
-
 
     @Override
     public void onDestroy() {
@@ -121,5 +116,28 @@ public class GPSservice extends IntentService {
         Log.d("mLog", "listener removed!");
 
         super.onDestroy();
+    }
+
+    private void sendGPSmessage(Location location){
+        GPSmessage message;
+        String comment = "no comment";
+        if (mFirechatUser!=null) {
+            if (location!=null) {
+                message = new GPSmessage(mFirechatUser.getEmail(),
+                                                    trackerName,
+                                                    String.valueOf(location.getLatitude()),
+                                                    String.valueOf(location.getLongitude()),
+                                                    String.valueOf(location.getTime()),
+                                                    comment);
+                mSimpleFirechatDatabaseReference.child(TRACKING).push().setValue(message);
+                Log.d("mLog","Sended message:\n Email "+ message.getUserMail() +
+                                            "\n Tracker name "+ message.getTrackerName()+
+                                            "\n Latitude "+ message.getCoordLat()+
+                                            "\n Longitude "+ message.getCoordLong()+
+                                            "\n Time "+message.getCoordTime()+
+                                            "\n Comment "+ message.getComment());
+            } else { Log.d("mLog","Location Error...");}
+
+        } else {Log.d("mLog","FirebaseUser = null");}
     }
 }
