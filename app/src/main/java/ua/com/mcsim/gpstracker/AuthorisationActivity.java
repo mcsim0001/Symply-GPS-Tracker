@@ -42,7 +42,6 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFireUser;
     private GoogleApiClient mGoogleApiClient;
-    private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,20 +65,7 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
                 .build();
 
         mFirebaseAuth = FirebaseAuth.getInstance();
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                } else {
-                    // User is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-                // ...
-            }
-        };
+
 
     }
 
@@ -126,6 +112,7 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
     public void signIn(){
         Intent authorizeIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(authorizeIntent, RC_SIGN_IN);
+
     }
 
     public void signOut(){
