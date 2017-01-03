@@ -1,10 +1,10 @@
-package ua.com.mcsim.gpstracker;
+package ua.com.mcsim.gpstracker.forms;
 
 
 public class GPSmessage {
 
     private String userMail;
-    private String trackerName;
+    private String phoneNumber;
     private String coordLat;
     private String coordLong;
     private String coordTime;
@@ -14,8 +14,8 @@ public class GPSmessage {
         return userMail;
     }
 
-    public String getTrackerName() {
-        return trackerName;
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
     public String getCoordLat() {
@@ -34,9 +34,9 @@ public class GPSmessage {
         return comment;
     }
 
-    public GPSmessage(String userMail, String trackerName, String coordLat, String coordLong, String coordTime, String comment) {
+    public GPSmessage(String userMail, String phoneNumber, String coordLat, String coordLong, String coordTime, String comment) {
         this.userMail = userMail;
-        this.trackerName = trackerName;
+        this.phoneNumber = phoneNumber;
         this.coordLat = coordLat;
         this.coordLong = coordLong;
         this.coordTime = coordTime;

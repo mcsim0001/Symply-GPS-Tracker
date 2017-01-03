@@ -21,6 +21,8 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Date;
 
+import ua.com.mcsim.gpstracker.services.GPSservice;
+
 public class TrackerActivity extends AppCompatActivity {
 
     private TextView tvNetStatus, tvGPSstatus, tvCoord;

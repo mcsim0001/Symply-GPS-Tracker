@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -25,10 +24,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-
-import static com.google.android.gms.internal.zzs.TAG;
 
 public class AuthorisationActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
                                                                         View.OnClickListener {
@@ -40,7 +36,6 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
     private SignInButton btnSignIn;
 
     private FirebaseAuth mFirebaseAuth;
-    private FirebaseUser mFireUser;
     private GoogleApiClient mGoogleApiClient;
 
     @Override
@@ -104,6 +99,7 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
                         } else {
                             Toast.makeText(AuthorisationActivity.this, "Authentication sucsess.",
                                     Toast.LENGTH_SHORT).show();
+                            finish();
                         }
                     }
                 });
@@ -129,15 +125,13 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
                 });
     }
 
-    public void refreshUser() {
-
-    }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_signin:{
                 signIn();
+
                 break;
             }
             case R.id.btn_signout:{
@@ -146,4 +140,5 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
             }
         }
     }
+
 }

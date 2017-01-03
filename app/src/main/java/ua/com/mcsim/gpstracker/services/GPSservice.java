@@ -1,10 +1,8 @@
-package ua.com.mcsim.gpstracker;
+package ua.com.mcsim.gpstracker.services;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -17,10 +15,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static android.R.id.message;
+import ua.com.mcsim.gpstracker.forms.GPSmessage;
 
 
 public class GPSservice extends IntentService {
@@ -28,7 +25,7 @@ public class GPSservice extends IntentService {
     private static final String TRACKING = "tracking";
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirechatUser;
-    private String trackerName = "mcsim";
+    private String phoneNumber = "+380673024779";
     private DatabaseReference mSimpleFirechatDatabaseReference;
 
     public GPSservice() {
@@ -120,18 +117,18 @@ public class GPSservice extends IntentService {
 
     private void sendGPSmessage(Location location){
         GPSmessage message;
-        String comment = "no comment";
+        String comment = " ";
         if (mFirechatUser!=null) {
             if (location!=null) {
                 message = new GPSmessage(mFirechatUser.getEmail(),
-                                                    trackerName,
+                                                    phoneNumber,
                                                     String.valueOf(location.getLatitude()),
                                                     String.valueOf(location.getLongitude()),
                                                     String.valueOf(location.getTime()),
                                                     comment);
                 mSimpleFirechatDatabaseReference.child(TRACKING).push().setValue(message);
                 Log.d("mLog","Sended message:\n Email "+ message.getUserMail() +
-                                            "\n Tracker name "+ message.getTrackerName()+
+                                            "\n Tracker name "+ message.getPhoneNumber()+
                                             "\n Latitude "+ message.getCoordLat()+
                                             "\n Longitude "+ message.getCoordLong()+
                                             "\n Time "+message.getCoordTime()+

@@ -4,6 +4,8 @@
     tools:context="ua.com.mcsim.gpstracker.MainActivity">
     <item android:title="Authorisation"
         android:id="@+id/action_auth" />
+    <item android:title="Registration"
+        android:id="@+id/action_reg" />
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
