@@ -24,6 +24,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -51,9 +55,6 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseAuth mFirebaseAuth;
     private FragmentManager fm;
-    //private GoogleMap map;
-    public static final String PREF_USERNAME = "username";
-    public static final String PREF_USERID = "userid";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,67 +92,24 @@ public class MainActivity extends AppCompatActivity {
                 if (user != null) {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                    setPrefUsername(user.getDisplayName());
+
 
                 } else {
                     // User is signed out
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
                     Toast.makeText(MainActivity.this, "You are not authorised! Please Sign In.", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(MainActivity.this, AuthorisationActivity.class);
                     startActivity(intent);
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
             }
         };
-
-
-
-
-
-    }
-
-
-
-    private void setPrefUsername(String displayName) {
-
-        SharedPreferences sPref = getPreferences(MODE_PRIVATE);
-        SharedPreferences.Editor ed = sPref.edit();
-        String userName = sPref.getString(PREF_USERNAME, "");
-        Log.d("mLog","Preference userName: " +userName);
-
-        if (userName.equals("")) {
-            if (displayName!=null) {
-                ed.putString(PREF_USERNAME, displayName);
-                ed.commit();
-                Toast.makeText(this, "Username: " + displayName, Toast.LENGTH_SHORT).show();
-                Log.d("mLog","Username initialized: " + displayName);
-            } else {
-                Log.d("mLog","Username not initialized!!!");
-            }
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (isNotRegistered()){
-            Intent intent = new Intent(MainActivity.this, RegistrationActivity.class);
-            startActivity(intent);
-        }
-    }
-
-    private boolean isNotRegistered() {
-
-        SharedPreferences sPref = getPreferences(MODE_PRIVATE);
-        String userID = sPref.getString(PREF_USERID, "");
-
-        return (userID.equals("")? true:false);
-
     }
 
     @Override
     public void onStart() {
         super.onStart();
         mFirebaseAuth.addAuthStateListener(mAuthListener);
+        Log.d("mLog", "AuthListener added");
     }
 
     @Override
@@ -159,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         if (mAuthListener != null) {
             mFirebaseAuth.removeAuthStateListener(mAuthListener);
+            Log.d("mLog", "AuthListener removed");
         }
     }
 
@@ -189,6 +148,10 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_reg) {
             Intent intent = new Intent(MainActivity.this, RegistrationActivity.class);
             startActivity(intent);
+            return true;
+        }
+        if (id == R.id.action_out) {
+
             return true;
         }
 
@@ -237,7 +200,6 @@ public class MainActivity extends AppCompatActivity {
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-        private GoogleMap mMap;
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -250,13 +212,14 @@ public class MainActivity extends AppCompatActivity {
             switch (position) {
                 case 0:
 
-                    return PlaceholderFragment.newInstance(position + 1);
+                    return new MapFragment();
                 case 1:
 
                     return PlaceholderFragment.newInstance(position + 1);
                 case 2:
-                    //MapFragment tab3 = new MapFragment();
-                    return new MapFragment();
+
+                    return PlaceholderFragment.newInstance(position + 1);
+
                 default:
                     return PlaceholderFragment.newInstance(position + 1);
             }

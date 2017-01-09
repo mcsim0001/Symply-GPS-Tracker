@@ -26,7 +26,7 @@ public class RegistrationActivity extends AppCompatActivity {
     private DatabaseReference mDatabaseReference;
     private String phoneNum;
     private String imeiNum;
-    private final String CHILD_USERS = "users";
+    public static final String CHILD_USERS = "users";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +44,7 @@ public class RegistrationActivity extends AppCompatActivity {
         mDatabaseReference = FirebaseDatabase.getInstance().getReference(CHILD_USERS);
 
         //Gettin device phone number and IMEI
-        TelephonyManager tMgr = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+        TelephonyManager tMgr = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         phoneNum = tMgr.getLine1Number();
         etPhone.setText(phoneNum);
         imeiNum = tMgr.getDeviceId();
@@ -54,16 +54,18 @@ public class RegistrationActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                User message = new User(etName.getText().toString(),phoneNum);
+                User message = new User(etName.getText().toString(), phoneNum);
                 try {
                     mDatabaseReference.child(imeiNum).setValue(message);
-                    Toast.makeText(context, "New user registered", Toast.LENGTH_SHORT).show();
-                    finish();
                 } catch (Exception e) {
                     e.printStackTrace();
                     Toast.makeText(context, "Database Error ", Toast.LENGTH_SHORT).show();
-                    Log.d("mLog","Database Error... ");
+                    Log.d("mLog", "Database Error... ");
+                    setResult(RESULT_CANCELED);
+                    finish();
                 }
+                setResult(RESULT_OK);
+                finish();
             }
         });
     }

@@ -1,9 +1,12 @@
 package ua.com.mcsim.gpstracker;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -25,11 +28,19 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import static ua.com.mcsim.gpstracker.RegistrationActivity.CHILD_USERS;
 
 public class AuthorisationActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
                                                                         View.OnClickListener {
 
     private static final int RC_SIGN_IN = 9001;
+    private static final int RC_REG = 1;
     private TextView tvUsername;
     private ImageView ivUser;
     private Button btnSignOut;
@@ -37,6 +48,7 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
 
     private FirebaseAuth mFirebaseAuth;
     private GoogleApiClient mGoogleApiClient;
+    private boolean result;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,12 +67,12 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
                 .requestEmail()
                 .build();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .enableAutoManage(this /*Activity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
         mFirebaseAuth = FirebaseAuth.getInstance();
-
+        Log.d("mLog", "Created Authorisation Activity");
 
     }
 
@@ -78,13 +90,28 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
             if (result.isSuccess()) {
                 GoogleSignInAccount account = result.getSignInAccount();
                 firebaseAuthWithGoogle(account);
+
+
             } else {
+                Log.d("mLog","Google Signin not success");
                 Toast.makeText(this, "Google signIn error. Try again later.", Toast.LENGTH_SHORT).show();
+            }
+        }
+        if (requestCode == RC_REG) {
+            if (resultCode == RESULT_OK) {
+                Log.d("mLog","Registration result: OK");
+                Toast.makeText(this, "New user registered", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                Log.d("mLog","Registration result: CANCELED");
+                Toast.makeText(this, "Database Error... Try again later.", Toast.LENGTH_SHORT).show();
+                finish();
             }
         }
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
+        Log.d("mLog", "Start firebaseAuthWithGoogle");
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mFirebaseAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -99,13 +126,42 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
                         } else {
                             Toast.makeText(AuthorisationActivity.this, "Authentication sucsess.",
                                     Toast.LENGTH_SHORT).show();
-                            finish();
+                            Log.d("mLog", "Authentication sucsess");
+                            checkRegistration();
+                            //finish();
                         }
                     }
                 });
     }
 
+    private void checkRegistration() {
+        Log.d("mLog", "Start checkRegistration method");
+        TelephonyManager tMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        DatabaseReference mDatabaseReference = FirebaseDatabase.getInstance().getReference(CHILD_USERS);
+        mDatabaseReference.child(tMgr.getDeviceId()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                result = (dataSnapshot.getValue()!=null);
+                Log.d("mLog", "Taking snapshot, result: " + result);
+                if (result) {
+                    Log.d("mLog", "User is already registered.");
+                    finish();
+                } else {
+                    Intent intent = new Intent(AuthorisationActivity.this, RegistrationActivity.class);
+                    startActivityForResult(intent,RC_REG);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d("mLog", "DatabaseError");
+                Toast.makeText(AuthorisationActivity.this, "Connection error!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     public void signIn(){
+        Log.d("mLog", "Start signIn method");
         Intent authorizeIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(authorizeIntent, RC_SIGN_IN);
 
@@ -124,6 +180,8 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
                     }
                 });
     }
+
+
 
 
     @Override
