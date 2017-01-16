@@ -1,7 +1,7 @@
 package ua.com.mcsim.gpstracker;
 
+import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -14,6 +14,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,20 +25,21 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.maps.GoogleMap;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
+import ua.com.mcsim.gpstracker.forms.TrackingPermission;
+import ua.com.mcsim.gpstracker.forms.User;
 import ua.com.mcsim.gpstracker.fragments.MapFragment;
 
 import static com.google.android.gms.internal.zzs.TAG;
+import static ua.com.mcsim.gpstracker.RegistrationActivity.CHILD_USERS;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String CHILD_PERMISSIONS = "permission";
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -53,8 +55,9 @@ public class MainActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private FirebaseAuth mFirebaseAuth;
+    public FirebaseAuth mFirebaseAuth;
     private FragmentManager fm;
+    public DatabaseReference mDatabaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                Intent intent = new Intent(MainActivity.this,PermissionActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -103,7 +108,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
     }
+
 
     @Override
     public void onStart() {
@@ -194,6 +201,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -236,11 +245,11 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "Targets";
-                case 1:
-                    return "Spectators";
-                case 2:
                     return "Map";
+                case 1:
+                    return "Targets";
+                case 2:
+                    return "Spectators";
             }
             return null;
         }

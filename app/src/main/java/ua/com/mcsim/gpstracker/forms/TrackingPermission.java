@@ -7,15 +7,26 @@ public class TrackingPermission {
     private String from;
     private String to;
     private String status;
-    private String password;
 
-    public TrackingPermission(String from, String to, String status) {
-        this.from = from;
-        this.to = to;
-        this.status = status;
+    public String getFrom() {
+        return from;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public String getTo() {
+        return to;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public TrackingPermission(String from, String to, int status) {
+        this.from = from;
+        this.to = to;
+        this.status = String.valueOf(status);
+
+    }
+
+    public TrackingPermission() {
     }
 }

@@ -34,8 +34,9 @@
             android:value="@string/google_maps_key" />
 
         <activity android:name=".RegistrationActivity" />
-        <activity android:name=".MyContext"></activity>
-        <activity android:name=".FirebaseHelper"></activity>
+        <activity android:name=".MyContext" />
+        <activity android:name=".FirebaseHelper" />
+        <activity android:name=".PermissionActivity"></activity>
     </application>
 
 </manifest>
