@@ -2,6 +2,8 @@ package ua.com.mcsim.gpstracker;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,6 +29,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,7 +37,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import static ua.com.mcsim.gpstracker.RegistrationActivity.CHILD_USERS;
+import ua.com.mcsim.gpstracker.forms.User;
+
+import static ua.com.mcsim.gpstracker.BaseActivity.CHILD_USERS;
+import static ua.com.mcsim.gpstracker.BaseActivity.PREF_ID;
+import static ua.com.mcsim.gpstracker.BaseActivity.PREF_NAME;
+import static ua.com.mcsim.gpstracker.BaseActivity.PREF_PHONE;
 
 public class AuthorisationActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
                                                                         View.OnClickListener {
@@ -45,16 +53,18 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
     private ImageView ivUser;
     private Button btnSignOut;
     private SignInButton btnSignIn;
-
     private FirebaseAuth mFirebaseAuth;
+    private FirebaseUser firebaseUser;
     private GoogleApiClient mGoogleApiClient;
     private boolean result;
+    private SharedPreferences pref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authorisation);
 
+        pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         tvUsername = (TextView) findViewById(R.id.tv_username);
         ivUser = (ImageView) findViewById(R.id.iv_user);
         btnSignIn = (SignInButton) findViewById(R.id.btn_signin);
@@ -127,8 +137,11 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
                             Toast.makeText(AuthorisationActivity.this, "Authentication sucsess.",
                                     Toast.LENGTH_SHORT).show();
                             Log.d("mLog", "Authentication sucsess");
+                            firebaseUser = mFirebaseAuth.getCurrentUser();
+                            SharedPreferences.Editor ed = pref.edit();
+                            ed.putString(PREF_NAME,firebaseUser.getDisplayName());
+                            ed.commit();
                             checkRegistration();
-                            //finish();
                         }
                     }
                 });
@@ -136,15 +149,18 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
 
     private void checkRegistration() {
         Log.d("mLog", "Start checkRegistration method");
-        TelephonyManager tMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        Log.d("mLog", "Preference ID: " + pref.getString(PREF_ID,"") + " Phone: " + pref.getString(PREF_PHONE,""));
         DatabaseReference mDatabaseReference = FirebaseDatabase.getInstance().getReference(CHILD_USERS);
-        mDatabaseReference.child(tMgr.getDeviceId()).addListenerForSingleValueEvent(new ValueEventListener() {
+        Log.d("mLog", "Checking for " + pref.getString(PREF_ID,""));
+        mDatabaseReference.child(pref.getString(PREF_ID,"")).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 result = (dataSnapshot.getValue()!=null);
                 Log.d("mLog", "Taking snapshot, result: " + result);
                 if (result) {
                     Log.d("mLog", "User is already registered.");
+                    User user = dataSnapshot.getValue(User.class);
+                    setPrefName(user.getUserName());
                     finish();
                 } else {
                     Intent intent = new Intent(AuthorisationActivity.this, RegistrationActivity.class);
@@ -158,6 +174,12 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
                 Toast.makeText(AuthorisationActivity.this, "Connection error!", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void setPrefName(String name) {
+        SharedPreferences.Editor ed = pref.edit();
+        ed.putString(PREF_NAME,name);
+        ed.commit();
     }
 
     public void signIn(){

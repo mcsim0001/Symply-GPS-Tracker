@@ -2,7 +2,6 @@ package ua.com.mcsim.gpstracker;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
@@ -11,31 +10,18 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
 import ua.com.mcsim.gpstracker.forms.TrackingPermission;
-import ua.com.mcsim.gpstracker.forms.User;
 
-import static java.lang.Thread.sleep;
-import static ua.com.mcsim.gpstracker.MainActivity.CHILD_PERMISSIONS;
-import static ua.com.mcsim.gpstracker.RegistrationActivity.CHILD_USERS;
+public class PermissionActivity extends BaseActivity implements View.OnClickListener {
 
-public class PermissionActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private static final String CHILD_PHONE = "phone";
     EditText etTargetPhone;
     Button btnSendPermission;
     private DatabaseReference mDatabaseReference;
@@ -82,6 +68,7 @@ public class PermissionActivity extends AppCompatActivity implements View.OnClic
                     }
                     Log.d("mLog", "Create permission for number: " + number);
                     createNewPermission();
+                    finish();
                 }
 
                 @Override
