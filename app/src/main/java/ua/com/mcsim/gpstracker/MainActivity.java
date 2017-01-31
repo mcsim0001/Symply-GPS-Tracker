@@ -16,10 +16,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import ua.com.mcsim.gpstracker.fragments.MapFragment;
+import ua.com.mcsim.gpstracker.fragments.TargetsFragment_test;
 
 
 public class MainActivity extends BaseActivity {
@@ -40,13 +42,13 @@ public class MainActivity extends BaseActivity {
      */
     private ViewPager mViewPager;
     private FragmentManager fm;
-    public DatabaseReference mDatabaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d("mLog","MainActivity: onCreate");
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -72,7 +74,6 @@ public class MainActivity extends BaseActivity {
                 startActivity(intent);
             }
         });
-        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
     }
 
 
@@ -175,7 +176,7 @@ public class MainActivity extends BaseActivity {
                     TargetsFragment tfrag = new TargetsFragment();
                     tfrag.setArguments(bundle);
                     return tfrag;*/
-                    return PlaceholderFragment.newInstance(position + 1);
+                    return new TargetsFragment_test();
                 case 2:
 
                     return PlaceholderFragment.newInstance(position + 1);

@@ -42,7 +42,6 @@ import ua.com.mcsim.gpstracker.forms.User;
 import static ua.com.mcsim.gpstracker.BaseActivity.CHILD_USERS;
 import static ua.com.mcsim.gpstracker.BaseActivity.PREF_ID;
 import static ua.com.mcsim.gpstracker.BaseActivity.PREF_NAME;
-import static ua.com.mcsim.gpstracker.BaseActivity.PREF_PHONE;
 
 public class AuthorisationActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
                                                                         View.OnClickListener {
@@ -149,7 +148,7 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
 
     private void checkRegistration() {
         Log.d("mLog", "Start checkRegistration method");
-        Log.d("mLog", "Preference ID: " + pref.getString(PREF_ID,"") + " Phone: " + pref.getString(PREF_PHONE,""));
+        Log.d("mLog", "Preference ID: " + pref.getString(PREF_ID,""));
         DatabaseReference mDatabaseReference = FirebaseDatabase.getInstance().getReference(CHILD_USERS);
         Log.d("mLog", "Checking for " + pref.getString(PREF_ID,""));
         mDatabaseReference.child(pref.getString(PREF_ID,"")).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -160,6 +159,7 @@ public class AuthorisationActivity extends AppCompatActivity implements GoogleAp
                 if (result) {
                     Log.d("mLog", "User is already registered.");
                     User user = dataSnapshot.getValue(User.class);
+                    Log.d("mLog", "Username: " + user.getUserName() + " Phone: " + user.getPhone());
                     setPrefName(user.getUserName());
                     finish();
                 } else {

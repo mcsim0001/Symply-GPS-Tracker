@@ -3,7 +3,6 @@ package ua.com.mcsim.gpstracker.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -17,7 +16,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.concurrent.TimeUnit;
 
-import ua.com.mcsim.gpstracker.forms.GPSmessage;
+import ua.com.mcsim.gpstracker.forms.Location;
 
 
 public class GPSservice extends IntentService {
@@ -35,7 +34,7 @@ public class GPSservice extends IntentService {
     private LocationManager locationManager;
     private LocationListener locationListener = new LocationListener() {
         @Override
-        public void onLocationChanged(Location location) {
+        public void onLocationChanged(android.location.Location location) {
             sendGPSmessage(location);
         }
 
@@ -115,24 +114,18 @@ public class GPSservice extends IntentService {
         super.onDestroy();
     }
 
-    private void sendGPSmessage(Location location){
-        GPSmessage message;
+    private void sendGPSmessage(android.location.Location location){
+        Location message;
         String comment = " ";
         if (mFirechatUser!=null) {
             if (location!=null) {
-                message = new GPSmessage(mFirechatUser.getEmail(),
-                                                    phoneNumber,
-                                                    String.valueOf(location.getLatitude()),
-                                                    String.valueOf(location.getLongitude()),
-                                                    String.valueOf(location.getTime()),
-                                                    comment);
+                message = new Location( String.valueOf(location.getLatitude()),
+                                        String.valueOf(location.getLongitude()),
+                                        String.valueOf(location.getTime()));
                 mSimpleFirechatDatabaseReference.child(TRACKING).push().setValue(message);
-                Log.d("mLog","Sended message:\n Email "+ message.getUserMail() +
-                                            "\n Tracker name "+ message.getPhoneNumber()+
-                                            "\n Latitude "+ message.getCoordLat()+
+                Log.d("mLog","Sended message:\n Latitude "+ message.getCoordLat()+
                                             "\n Longitude "+ message.getCoordLong()+
-                                            "\n Time "+message.getCoordTime()+
-                                            "\n Comment "+ message.getComment());
+                                            "\n Time "+message.getCoordTime());
             } else { Log.d("mLog","Location Error...");}
 
         } else {Log.d("mLog","FirebaseUser = null");}

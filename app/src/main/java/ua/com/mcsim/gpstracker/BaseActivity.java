@@ -3,6 +3,7 @@ package ua.com.mcsim.gpstracker;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -13,6 +14,8 @@ import android.util.Log;
 import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.concurrent.TimeUnit;
 
 public class BaseActivity extends AppCompatActivity {
 
@@ -27,15 +30,19 @@ public class BaseActivity extends AppCompatActivity {
     public static final String PREF_NAME = "my_name";
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private SharedPreferences prefs;
 
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d("mLog","BaseActivity: onCreate");
+        MyTask myTask = new MyTask();
+        myTask.execute();
+
+    }
+
+    public void preparationToWork() {
         makeGeneralPreference();
-        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         mFirebaseAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -68,7 +75,7 @@ public class BaseActivity extends AppCompatActivity {
         editor.putString(PREF_ID, tMgr.getDeviceId());
         editor.putString(PREF_PHONE, tMgr.getLine1Number());
         editor.commit();
-        Log.d("mLog", "Preference ID: " + pref.getString(PREF_ID,"") + " Phone: " + pref.getString(PREF_PHONE,""));
+        Log.d("mLog", "Preference ID: " + pref.getString(PREF_ID,""));
     }
 
     @Override
@@ -90,6 +97,27 @@ public class BaseActivity extends AppCompatActivity {
             Log.d("mLog", "AuthListener removed");
         }
     }
+    private class MyTask extends AsyncTask<Void, String, Void> {
 
+        @Override
+        protected Void doInBackground(Void... voids) {
+            publishProgress("Make general preference...");
+            preparationToWork();
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+
+        }
+    }
 
 }

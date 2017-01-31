@@ -17,7 +17,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import java.util.HashSet;
 import java.util.Set;
-import ua.com.mcsim.gpstracker.forms.TrackingPermission;
 
 public class PermissionActivity extends BaseActivity implements View.OnClickListener {
 
@@ -67,7 +66,7 @@ public class PermissionActivity extends BaseActivity implements View.OnClickList
                         }
                     }
                     Log.d("mLog", "Create permission for number: " + number);
-                    createNewPermission();
+                    //createNewPermission();
                     finish();
                 }
 
@@ -82,7 +81,7 @@ public class PermissionActivity extends BaseActivity implements View.OnClickList
         Log.d("mLog", "onClick finish ");
     }
 
-    public void createNewPermission() {
+    /*public void createNewPermission() {
 
         String targetID = getTargetID(targetSet);
         if (targetID != null) {
@@ -98,7 +97,7 @@ public class PermissionActivity extends BaseActivity implements View.OnClickList
             Toast.makeText(this, "User with number " + number + " not found. Please, check phone number and try again.", Toast.LENGTH_LONG).show();
         }
         Log.d("mLog", "createNewPermission finish ");
-    }
+    }*/
 
     private String getTargetID(Set<String> target) {
         Log.d("mLog", "getTargetID start ");
